@@ -1,3 +1,5 @@
+// src/pages/LoginPage.tsx
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
@@ -8,34 +10,36 @@ import {
   Typography,
   Box,
   CircularProgress,
-  Alert,
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
 
-const LoginPage: React.FC = () => {
+interface LoginPageProps {
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const LoginPage: React.FC<LoginPageProps> = ({ setIsAuthenticated }) => {
   const [username, setUsername] = useState<string>('user1');
   const [password, setPassword] = useState<string>('password');
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     try {
       const response = await login(username, password);
       if (response.error_code === 0) {
         localStorage.setItem('token', response.data.token);
+        setIsAuthenticated(true); // Обновляем состояние авторизации
         enqueueSnackbar('Успешный вход в систему', { variant: 'success' });
-        navigate('/documents');
+        navigate('/documents'); // Перенаправляем на страницу с таблицей
       } else {
         enqueueSnackbar(response.error_message || 'Ошибка авторизации', { variant: 'error' });
       }
     } catch (err) {
-    enqueueSnackbar('Ошибка сети', { variant: 'error' });
+      enqueueSnackbar('Ошибка сети', { variant: 'error' });
     } finally {
       setLoading(false);
     }
@@ -47,7 +51,6 @@ const LoginPage: React.FC = () => {
         <Typography variant="h4" align="center" gutterBottom>
           Авторизация
         </Typography>
-        {error && <Alert severity="error">{error}</Alert>}
         <form onSubmit={handleSubmit}>
           <TextField
             label="Имя пользователя"
@@ -69,13 +72,7 @@ const LoginPage: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
           <Box sx={{ position: 'relative', mt: 2 }}>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              fullWidth
-              disabled={loading}
-            >
+            <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading}>
               Войти
             </Button>
             {loading && (

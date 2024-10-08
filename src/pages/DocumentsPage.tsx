@@ -1,3 +1,5 @@
+// src/pages/DocumentsPage.tsx
+
 import React, { useEffect, useState } from 'react';
 import {
   Container,
@@ -12,9 +14,13 @@ import { Document } from '../types';
 import DocumentsTable from '../components/DocumentsTable';
 import DocumentForm from '../components/DocumentForm';
 import { useNavigate } from 'react-router-dom';
-import { useSnackbar } from 'notistack'; 
+import { useSnackbar } from 'notistack';
 
-const DocumentsPage: React.FC = () => {
+interface DocumentsPageProps {
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const DocumentsPage: React.FC<DocumentsPageProps> = ({ setIsAuthenticated }) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
@@ -34,12 +40,11 @@ const DocumentsPage: React.FC = () => {
       const response = await getDocuments();
       if (response.error_code === 0) {
         setDocuments(response.data);
-        enqueueSnackbar('Документ успешно удален', { variant: 'success' });
       } else {
-        enqueueSnackbar(response.error_message || 'Ошибка удаления документа', { variant: 'error' });
+        setError(response.error_message || 'Ошибка загрузки данных');
       }
     } catch (err) {
-    enqueueSnackbar('Ошибка сети', { variant: 'error' });
+      setError('Ошибка сети');
     } finally {
       setLoading(false);
     }
@@ -51,11 +56,12 @@ const DocumentsPage: React.FC = () => {
       const response = await deleteDocument(id);
       if (response.error_code === 0) {
         setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+        enqueueSnackbar('Документ успешно удален', { variant: 'success' });
       } else {
-        setError(response.error_message || 'Ошибка удаления');
+        enqueueSnackbar(response.error_message || 'Ошибка удаления документа', { variant: 'error' });
       }
     } catch (err) {
-      setError('Ошибка сети');
+      enqueueSnackbar('Ошибка сети', { variant: 'error' });
     } finally {
       setLoading(false);
     }
@@ -63,7 +69,22 @@ const DocumentsPage: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    setIsAuthenticated(false); // Обновляем состояние авторизации
     navigate('/login');
+  };
+
+  const handleFormSuccess = (doc: Document) => {
+    if (editingDocument) {
+      // Обновляем существующий документ
+      setDocuments((prev) => prev.map((d) => (d.id === doc.id ? doc : d)));
+      enqueueSnackbar('Документ успешно обновлен', { variant: 'success' });
+    } else {
+      // Добавляем новый документ
+      setDocuments((prev) => [doc, ...prev]);
+      enqueueSnackbar('Документ успешно создан', { variant: 'success' });
+    }
+    setOpenForm(false);
+    setEditingDocument(null);
   };
 
   return (
@@ -79,7 +100,11 @@ const DocumentsPage: React.FC = () => {
           </Button>
         </Box>
       </Box>
-      {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      )}
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <CircularProgress />
@@ -101,17 +126,7 @@ const DocumentsPage: React.FC = () => {
             setOpenForm(false);
             setEditingDocument(null);
           }}
-          onSuccess={(doc) => {
-            if (editingDocument) {
-              setDocuments((prev) =>
-                prev.map((d) => (d.id === doc.id ? doc : d))
-              );
-            } else {
-              setDocuments((prev) => [doc, ...prev]);
-            }
-            setOpenForm(false);
-            setEditingDocument(null);
-          }}
+          onSuccess={handleFormSuccess}
           document={editingDocument}
         />
       )}
