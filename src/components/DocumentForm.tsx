@@ -57,7 +57,6 @@ const DocumentForm: React.FC<DocumentFormProps> = ({ open, onClose, onSuccess, d
           onSuccess(response.data);
           enqueueSnackbar('Документ успешно обновлен', { variant: 'success' });
         } else {
-        //   setError(response.error_message || 'Ошибка при обновлении');
         enqueueSnackbar(response.error_message || 'Ошибка обновления документа', { variant: 'error' });
         }
       } else {
@@ -66,12 +65,10 @@ const DocumentForm: React.FC<DocumentFormProps> = ({ open, onClose, onSuccess, d
           onSuccess(response.data);
           enqueueSnackbar('Документ успешно создан', { variant: 'success' });
         } else {
-        //   setError(response.error_message || 'Ошибка при создании');
         enqueueSnackbar(response.error_message || 'Ошибка создания документа', { variant: 'error' });
         }
       }
     } catch (err) {
-    //   setError('Ошибка сети');
     enqueueSnackbar('Ошибка сети', { variant: 'error' });
     } finally {
       setLoading(false);

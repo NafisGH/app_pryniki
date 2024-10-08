@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
@@ -34,11 +32,9 @@ const LoginPage: React.FC = () => {
         enqueueSnackbar('Успешный вход в систему', { variant: 'success' });
         navigate('/documents');
       } else {
-        // setError(response.error_message || 'Ошибка авторизации');
         enqueueSnackbar(response.error_message || 'Ошибка авторизации', { variant: 'error' });
       }
     } catch (err) {
-    //   setError('Ошибка сети');
     enqueueSnackbar('Ошибка сети', { variant: 'error' });
     } finally {
       setLoading(false);

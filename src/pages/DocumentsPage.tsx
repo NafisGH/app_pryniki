@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState } from 'react';
 import {
   Container,
@@ -14,7 +12,7 @@ import { Document } from '../types';
 import DocumentsTable from '../components/DocumentsTable';
 import DocumentForm from '../components/DocumentForm';
 import { useNavigate } from 'react-router-dom';
-import { useSnackbar } from 'notistack'; // Импортируем useSnackbar
+import { useSnackbar } from 'notistack'; 
 
 const DocumentsPage: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -38,11 +36,9 @@ const DocumentsPage: React.FC = () => {
         setDocuments(response.data);
         enqueueSnackbar('Документ успешно удален', { variant: 'success' });
       } else {
-        // setError(response.error_message || 'Ошибка загрузки данных');
         enqueueSnackbar(response.error_message || 'Ошибка удаления документа', { variant: 'error' });
       }
     } catch (err) {
-    //   setError('Ошибка сети');
     enqueueSnackbar('Ошибка сети', { variant: 'error' });
     } finally {
       setLoading(false);
